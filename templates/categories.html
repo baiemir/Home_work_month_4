@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Categories</title>
+</head>
+<body>
+    <h1>Активные категории</h1>
+    <ul>
+        {% for category in categories %}
+            <li>
+                strong>{{ category.title }}</strong> - {{ category.description }}
+            </li>
+        {% empty %}
+            <li>Нет активных категорий</li>
+        {% endfor %}
+    </ul>
+    
+</body>
+</html>
