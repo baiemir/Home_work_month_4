@@ -6,6 +6,9 @@ from django.db import models
 class Tags(models.Model):
     name = models.CharField()
 
+    def __str__(self) -> str:
+        return self.name
+
 class Category(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -23,7 +26,7 @@ class Post(models.Model):
     tags = models.ManyToManyField(Tags, null=True, blank=True)
 
     def __str__(self) -> str:
-        name = self.category.name if self.category else "-"
+        name = self.category.title if self.category else "-"
         return f"{self.title} -- ({name})"
 
 class Meta:

@@ -1,15 +1,13 @@
 from django.shortcuts import render
 from django.http.response import HttpResponse
 from django.shortcuts import render
-from posts.models import Post
-from posts.models import Category
+from posts.models import Post, Category
 # Create your views here.
 
 
-def hello_world(request):
+def home(request):
 
-    return HttpResponse("<h1>Hello world!</h1>")
-
+    return render(request, "base.html")
 
 
 def about(request):
@@ -21,7 +19,7 @@ def me(request):
     return HttpResponse("<h1>IT'S TEST!</h1>")
 
 def post(request):
-    post = Post.objects.all()
+    posts = Post.objects.all()
 
     text = ""
     for post in posts:
@@ -32,3 +30,25 @@ def post(request):
 def activate_categories_views(request):
     categories = Category.objects.filter(is_active=True)
     return render(request, "categories.html", {"categories": categories})
+
+def get_posts(request, pk=None):
+    if pk is not None:
+        posts = Post.objects.filter(id=pk)
+    else:
+        posts = Post.objects.all()
+    return render(request, "posts/post_list.html", context={"posts": posts, "categories": Category.objects.filter(is_active=True)})
+
+
+def get_detail(request, pk):
+    post = Post.objects.get(id=pk)
+    return render(request, "posts/post_detail.html", context={"post": post})
+
+def category_detail(request, pk):
+    category = Category.objects.get(id=pk)
+    category_posts = category.post_set.all()
+    context = {
+        "categories": Category.objects.filter(is_active=True),
+        "category": category,
+        "category_posts": category_posts
+    }
+    return render(request, "categories/category_detail.html", context=context)
