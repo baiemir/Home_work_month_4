@@ -35,7 +35,5 @@ pip-selfcheck.json
     .ionide
 # End of https://www.toptal.com/developers/gitignore/api/venv,visualstudiocode
 
-db.sqlite3
 venv/
-__pycache__/
-*.pyc
+*.sqlite3
