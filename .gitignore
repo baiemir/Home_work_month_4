@@ -35,5 +35,18 @@ pip-selfcheck.json
     .ionide
 # End of https://www.toptal.com/developers/gitignore/api/venv,visualstudiocode
 
+# virtual environment
 venv/
-*.sqlite3
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Django
+db.sqlite3
+
+# IDE
+.vscode/
+.idea/
