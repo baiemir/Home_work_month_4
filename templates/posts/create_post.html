@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать пост | Мой блог</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        body {
+            background-color: #121212;
+        }
+        .brand-title {
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .form-card {
+            background-color: #1e1e1e;
+            border: 1px solid #2d2d2d;
+        }
+        .form-control, .form-select {
+            background-color: #2b2b2b !important;
+            border: 1px solid #3d3d3d !important;
+            color: #fff !important;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #0dcaf0 !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25) !important;
+        }
+        .form-label {
+            color: #adb5bd;
+            font-weight: 500;
+        }
+        .invalid-feedback {
+            color: #ea868f !important;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <header class="py-4 mb-5 border-bottom border-secondary-subtle">
+        <div class="container">
+            <a href="{% url 'post_list' 1 %}" class="text-decoration-none text-light">
+                <h1 class="fw-light text-center mb-0 brand-title fs-3">Мой блог</h1>
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-grow-1">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    
+                    <div class="card form-card shadow-lg rounded-4 p-4 p-md-5 mb-5">
+                        <h2 class="fw-normal mb-4 text-white text-center">Новая публикация</h2>
+
+                        {% if errors %}
+                        <div class="alert alert-danger border-0 rounded-3 mb-4" role="alert">
+                            <div class="small">{{ errors }}</div>
+                        </div>
+                        {% endif %}
+
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'create_post' %}">
+                            {% csrf_token %}
+
+                            <div class="mb-4">
+                                <label for="id_title" class="form-label">Заголовок статьи</label>
+                                <input type="text" name="title" id="id_title" 
+                                       class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}" 
+                                       placeholder="Введите название..." 
+                                       value="{{ form.title.value|default:'' }}" required>
+                                
+                                {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.title.errors|striptags }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="id_category" class="form-label">Категория</label>
+                                    <select name="category" id="id_category" class="form-select {% if form.category.errors %}is-invalid{% endif %}">
+                                        {% for category in categories %}
+                                            <option value="{{ category.pk }}" {% if form.category.value == category.pk %}selected{% endif %}>
+                                                {{ category.title }}
+                                            </option>
+                                        {% endfor %}
+                                        <option value="" {% if not form.category.value %}selected{% endif %}>Без категории</option>
+                                    </select>
+                                    
+                                    {% if form.category.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.category.errors|striptags }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-text text-muted small mt-1">Нет нужной категории? Создайте её ниже ↓</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="id_image" class="form-label">Изображение</label>
+                                    <input type="file" name="image" id="id_image" 
+                                           class="form-control form-control-lg {% if form.image.errors %}is-invalid{% endif %}" 
+                                           accept="image/*">
+                                    
+                                    {% if form.image.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.image.errors|striptags }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="id_content" class="form-label">Текст статьи</label>
+                                <textarea name="content" id="id_content" rows="10" 
+                                          class="form-control {% if form.content.errors %}is-invalid{% endif %}" 
+                                          placeholder="О чем хотите рассказать? (минимум 50 символов)" required>{{ form.content.value|default:'' }}</textarea>
+                                
+                                {% if form.content.errors %}
+                                <div class="invalid-feedback fw-bold">
+                                    <i class="bi bi-exclamation-triangle"></i> {{ form.content.errors|striptags }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="{% url 'post_list' 1 %}" class="btn btn-outline-secondary rounded-pill px-4 me-md-2">Отмена</a>
+                                <button type="submit" class="btn btn-info text-dark fw-bold rounded-pill px-5">Опубликовать</button>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <div class="card form-card shadow-lg rounded-4 p-4 p-md-5 mb-5">
+                        <h3 class="fw-normal mb-3 text-white fs-4"><i class="bi bi-tags text-info me-2"></i>Добавить новую категорию</h3>
+                        <p class="text-muted small mb-4">После создания категория сразу появится в выпадающем списке формы поста выше.</p>
+
+                        <form method="POST" action="{% url 'create_category' %}">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label for="id_category_title" class="form-label">Название категории</label>
+                                <input type="text" name="title" id="id_category_title" 
+                                       class="form-control form-control-lg {% if category_form.title.errors %}is-invalid{% endif %}" 
+                                       placeholder="Например: Программирование, Путешествия..." required>
+                                {% if category_form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {{ category_form.title.errors|striptags }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="id_category_description" class="form-label">Описание категории</label>
+                                <textarea name="description" id="id_category_description" rows="3" 
+                                          class="form-control {% if category_form.description.errors %}is-invalid{% endif %}" 
+                                          placeholder="Краткое описание того, о чем эта категория..."></textarea>
+                                {% if category_form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {{ category_form.description.errors|striptags }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="id_category_is_active" checked>
+                                    <label class="form-check-label text-muted" for="id_category_is_active">
+                                        Активировать категорию сразу
+                                    </label>
+                                </div>
+                                {% if category_form.is_active.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ category_form.is_active.errors|striptags }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-outline-info fw-bold rounded-pill px-4">
+                                    <i class="bi bi-plus-lg me-1"></i> Создать категорию
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-4 mt-5 border-top border-secondary-subtle text-center text-muted small">
+        <div class="container">
+            © <span id="year"></span> Мой блог
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+</body>
+</html>

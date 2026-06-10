@@ -18,16 +18,22 @@ class Category(models.Model):
         return self.title
 
 class Post(models.Model):
+    create_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    update_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     title = models.CharField()
     content = models.TextField()
     rate = models.IntegerField()
     user = models.CharField(max_length=255, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    tags = models.ManyToManyField(Tags, null=True, blank=True)
+    #tags = models.ManyToManyField(Tags, null=True, blank=True)
+    image = models.ImageField(upload_to='posts/', null=True, blank=True)
 
     def __str__(self) -> str:
         name = self.category.title if self.category else "-"
         return f"{self.title} -- ({name})"
+
+    class Meta:
+        ordering = ["-create_at"]
 
 class Meta:
     verbose_name = "Post"

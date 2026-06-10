@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой блог</title>
+    <title>Главная | Мой блог</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -14,29 +14,115 @@
         .brand-title {
             letter-spacing: 2px;
             text-transform: uppercase;
+        }
         .article-card {
             background-color: #1e1e1e;
             border: 1px solid #2d2d2d;
         }
-    }
+        /* Стили для картинок постов с вашим эффектом */
+        .post-card-img-container {
+            height: 140px;
+            overflow: hidden;
+            transition: height 0.4s ease-in-out;
+        }
+        .post-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center bottom;
+            transition: object-position 0.4s ease-in-out;
+        }
+        .post-card {
+            transition: box-shadow 0.3s ease-in-out;
+            background-color: #1e1e1e !important;
+            border: 1px solid #2d2d2d !important;
+        }
+        .post-card:hover .post-card-img-container {
+            height: 380px;
+        }
+        .post-card:hover .post-card-img {
+            object-position: center center;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
     
-    <header class="py-4 border-bottom border-secondary-subtle">
-        <div class="container text-center">
-            <h1 class="fw-light">Мой блог</h1>
+    <header class="py-3 border-bottom border-secondary-subtle bg-dark-subtle mb-5">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="fw-light mb-0 brand-title fs-4 text-white">Мой блог</h1>
+            <a href="{% url 'create_post' %}" class="btn btn-outline-info btn-sm rounded-pill px-3">
+                + Создать пост
+            </a>
         </div>
     </header>
 
-    <main class="flex-grow-1 d-flex align-items-center justify-content-center">
-        <div class="text-center">
-            <h2 class="fw-light">Добро пожаловать</h2>
-            <p class="text-muted">Личный блог</p>
+    <main class="flex-grow-1">
+        <div class="container">
+            <div class="row justify-content-center">
+                
+                <div class="col-lg-8" style="max-width: 750px;">
+                    
+                    <div class="text-center p-4 rounded-4 article-card shadow-sm mb-5">
+                        <h2 class="fw-light mb-2 text-white">Добро пожаловать</h2>
+                        <p class="text-muted mb-0">Личный блог на Django & Bootstrap 5</p>
+                    </div>
+
+                    <h3 class="fw-light text-white mb-4">Все публикации:</h3>
+
+                    {# ЦИКЛ ВЫВОДА ВСЕХ ПОСТОВ #}
+                    {% for post in posts %}
+                    <article class="card post-card mb-4 shadow-sm rounded-4 overflow-hidden">
+                        
+                        {% if post.image %}
+                        <a href="{% url 'post_detail' post.pk %}">
+                            <div class="post-card-img-container">
+                                <img src="{{ post.image.url }}" class="card-img-top post-card-img" alt="{{ post.title }}">
+                            </div>
+                        </a>
+                        {% endif %}
+
+                        <div class="card-body p-4">
+                            {% if post.category %}
+                            <div class="mb-2">
+                                <span class="text-info small fw-semibold text-uppercase" style="letter-spacing: 1px;">
+                                    {{ post.category.title }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <h2 class="h4 fw-normal mb-3">
+                                <a href="{% url 'post_detail' post.pk %}" class="text-decoration-none text-white link-primary">
+                                    {{ post.title }}
+                                </a>
+                            </h2>
+                            
+                            <p class="card-text text-muted lh-lg">
+                                {{ post.content|truncatewords:20 }}
+                            </p>
+
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                <a href="{% url 'post_detail' post.pk %}" class="btn btn-outline-light btn-sm px-3 rounded-pill">
+                                    Читать далее →
+                                </a>
+                                {% if post.published_date %}
+                                <small class="text-muted">{{ post.published_date|date:"j E Y" }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </article>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <p class="text-muted fs-5">Статей пока нет. Нажмите «Создать пост» выше!</p>
+                    </div>
+                    {% endfor %}
+
+                </div>
+
+            </div>
         </div>
     </main>
 
-    <footer class="py-3 border-top border-secondary-subtle text-center text-muted">
+    <footer class="py-3 mt-5 border-top border-secondary-subtle text-center text-muted small">
         <div class="container">
             © <span id="year"></span> Мой блог
         </div>

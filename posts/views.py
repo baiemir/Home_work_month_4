@@ -1,13 +1,16 @@
 from django.shortcuts import render
 from django.http.response import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from posts.models import Post, Category
+from django.http import HttpRequest
+from posts.form import PostForm, CategoryModelForm
 # Create your views here.
 
 
 def home(request):
-
-    return render(request, "base.html")
+    all_posts = Post.objects.all().order_by("-create_at")
+    return render(request, "base.html", context={"posts": all_posts})
+    
 
 
 def about(request):
@@ -52,3 +55,48 @@ def category_detail(request, pk):
         "category_posts": category_posts
     }
     return render(request, "categories/category_detail.html", context=context)
+
+def create_post(request):
+    categoies = Category.objects.all()
+    category_form = CategoryModelForm()
+    if request.method == "POST":
+         # логика создания поста
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+            post = Post(
+                title=cleaned_data.get('title'), 
+                content=cleaned_data.get('content'), 
+                image=cleaned_data.get('image'), 
+                category=cleaned_data.get('category'), 
+                rate=5
+                )
+            post.save()
+            return redirect('posts') # перенаправляем на страницу со списком постов после создания
+        context = {
+                "categories": categoies,
+                "category_form": category_form,
+            }
+        return render(request, "posts/create_post.html", context={"errors": form.errors}) # если форма не валидна, возвращаем её с ошибками
+    form = PostForm()
+    context = {
+        "form": form,
+        "categories": categoies,
+        "category_form": category_form,
+    }
+    return render(request, "posts/create_post.html", context=context)
+
+def create_category(request):
+    if request.method == "POST":
+        form = CategoryModelForm(request.POST, request.FILES)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+            category =Category(
+                title = cleaned_data.get('title'),
+                description = cleaned_data.get('description'),
+                is_active = cleaned_data.get('is_active'),
+            )
+            category.save()
+            return redirect('posts') # перенаправляем на страницу со списком категорий после создания
+        return render(request, "posts/create_post.html", context={"errors": form.errors}) # если форма не валидна, возвращаем её с ошибками
+    return render(request, "posts/create_post.html")

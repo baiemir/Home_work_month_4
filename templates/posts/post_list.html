@@ -1,3 +1,8 @@
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="ru" data-bs-theme="dark">
 <head>
@@ -8,29 +13,58 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
-        body {
-            background-color: #121212;
-        }
-        .post-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            background-color: #1e1e1e !important;
-            border: 1px solid #2d2d2d !important;
-        }
-        .post-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4) !important;
-        }
-        .brand-title {
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        /* Стили для ссылки-категории */
-        .category-link {
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-    </style>
+    body {
+        background-color: #121212;
+    }
+    .brand-title {
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+    .category-link {
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    /* --- ИСПРАВЛЕННЫЙ CSS С ФОКУСОМ НА МАШИНУ --- */
+
+    /* Контейнер картинки */
+    .post-card-img-container {
+        height: 140px; /* Немного увеличили начальную высоту, чтобы машина влезала */
+        overflow: hidden;
+        transition: height 0.4s ease-in-out; /* Плавное раскрытие */
+    }
+
+    /* Сама картинка */
+    .post-card-img {
+        width: 100%;
+        height: 100%; /* Заставляем картинку заполнять контейнер по высоте */
+        object-fit: cover;
+        
+        /* КЛЮЧЕВАЯ СТРОКА: Прижимает фокус к нижней части картинки. 
+           Даже при сжатии до 140px низ (где стоит машина) останется в кадре! */
+        object-position: middle bottom; /* Фокус на нижней части картинки */
+        
+        transition: object-position 0.4s ease-in-out; /* Плавный сдвиг фокуса */
+    }
+
+    /* Базовая карточка */
+    .post-card {
+        transition: box-shadow 0.3s ease-in-out;
+        background-color: #1e1e1e !important;
+        border: 1px solid #2d2d2d !important;
+    }
+
+    /* Наведение на карточку: раскрываем контейнер */
+    .post-card:hover .post-card-img-container {
+        height: 380px; /* Полная высота раскрытой картинки */
+    }
+
+    /* Наведение на карточку: центрируем картинку, когда она раскрылась */
+    .post-card:hover .post-card-img {
+        object-position: center center; /* Плавно возвращаем фокус в центр */
+    }
+</style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
@@ -50,8 +84,19 @@
 
                     {% for post in posts %}
                     <article class="card post-card mb-4 shadow-sm rounded-4 overflow-hidden">
+                        
+                        {# Проверка наличия картинки у поста #}
+                        {% if post.image %}
+                        <a href="{% url 'post_detail' post.pk %}">
+                            {# !!! ВАЖНО: Обернули img в контейнер !!! #}
+                            <div class="post-card-img-container">
+                                <img src="{{ post.image.url }}" class="card-img-top post-card-img" alt="{{ post.title }}">
+                            </div>
+                        </a>
+                        {% endif %}
+
                         <div class="card-body p-4">
-                            
+                            {# Оставляем категорию, заголовок и контент без изменений #}
                             {% if post.category %}
                             <div class="mb-2">
                                 <a href="{% url 'category_detail' post.category.pk %}" class="text-decoration-none text-info category-link fw-semibold">
@@ -86,41 +131,3 @@
                         <p class="text-muted fs-5">Статей пока нет. Загляните позже!</p>
                     </div>
                     {% endfor %}
-
-                </div>
-
-                <div class="col-lg-4 d-none d-lg-block" style="max-width: 300px;">
-                    <div class="position-sticky" style="top: 2rem;">
-                        <div class="p-4 rounded-4" style="background-color: #1e1e1e; border: 1px solid #2d2d2d;">
-                            <h4 class="h5 fw-normal mb-3 text-white">Категории</h4>
-                            <ul class="list-unstyled mb-0">
-                                {% for category in categories %}
-                                <li class="mb-2">
-                                    <a href="{% url 'category_detail' category.pk %}" class="text-decoration-none text-muted link-light">
-                                        {{ category.title }} <span class="badge bg-secondary rounded-pill ms-1 fs-6 fw-light">{{ category.posts.count }}</span>
-                                    </a>
-                                </li>
-                                {% empty %}
-                                <li class="text-muted small">Категорий пока нет</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </main>
-
-    <footer class="py-4 mt-5 border-top border-secondary-subtle text-center text-muted small">
-        <div class="container">
-            © <span id="year"></span> Мой блог
-        </div>
-    </footer>
-
-    <script>
-        document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
-
-</body>
-</html>
