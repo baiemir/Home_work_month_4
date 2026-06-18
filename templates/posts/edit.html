@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование | {{ post.title }}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .edit-card {
+            background-color: #1e1e1e;
+            border: 1px solid #2d2d2d;
+        }
+        .current-img-preview {
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #3d3d3d;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <header class="py-3 border-bottom border-secondary-subtle bg-dark-subtle mb-5">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="/" class="text-decoration-none"><h1 class="fw-light mb-0 fs-4 text-white">Мой блог</h1></a>
+            
+            <div class="d-flex align-items-center gap-2">
+                {% if request.user.is_authenticated %}
+                    <span class="text-white-50 me-2 small">
+                        Привет, <strong class="text-white">{{ request.user.username }}</strong>!
+                    </span>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">Выйти</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow-1">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+
+                    <div class="card edit-card shadow-sm p-4 rounded-4 mb-5">
+                        <h2 class="fw-light text-white mb-4 text-center">Редактирование публикации</h2>
+
+                        {% if errors %}
+                        <div class="alert alert-danger rounded-3 small">
+                            {{ errors }}
+                        </div>
+                        {% endif %}
+
+                        <form method="post" action="{% url 'edit_post' post.pk %}" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            {% csrf_token %}
+
+                            <div class="mb-4">
+                                <label for="titleInput" class="form-label text-white-50 small">Заголовок статьи</label>
+                                <input 
+                                    type="text" 
+                                    name="title" 
+                                    class="form-control" 
+                                    id="titleInput" 
+                                    value="{{ post.title }}" 
+                                    placeholder="Введите новое название..." 
+                                    required
+                                >
+                                <div class="invalid-feedback">Пожалуйста, укажите заголовок статьи.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="contentInput" class="form-label text-white-50 small">Текст статьи</label>
+                                <textarea 
+                                    name="content" 
+                                    class="form-control" 
+                                    id="contentInput" 
+                                    rows="8" 
+                                    placeholder="О чем хотите рассказать?" 
+                                    required
+                                >{{ post.content }}</textarea>
+                                <div class="invalid-feedback">Текст статьи не может быть пустым.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="imageInput" class="form-label text-white-50 small">Обновить изображение</label>
+                                
+                                {% if post.image %}
+                                <div class="mb-2 d-flex align-items-center gap-3">
+                                    <img src="{{ post.image.url }}" class="current-img-preview" alt="Текущее изображение">
+                                    <div class="small text-muted">Сейчас загружено это фото. Вы можете выбрать новое.</div>
+                                </div>
+                                {% endif %}
+
+                                <input type="file" name="image" class="form-control" id="imageInput" accept="image/*">
+                            </div>
+
+                            <div class="mb-5">
+                                <label for="rateInput" class="form-label text-white-50 small">Оценка / Рейтинг поста (от 1 до 5)</label>
+                                <input 
+                                    type="number" 
+                                    name="rate" 
+                                    class="form-control" 
+                                    id="rateInput" 
+                                    value="{{ post.rate|default:5 }}" 
+                                    min="1" 
+                                    max="5" 
+                                    required
+                                >
+                                <div class="invalid-feedback">Введите число от 1 до 5.</div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 border-top border-secondary-subtle pt-4">
+                                <a href="/" class="btn btn-secondary rounded-pill px-4">Отмена</a>
+                                <button type="submit" class="btn btn-info text-dark fw-semibold rounded-pill px-4">Сохранить изменения</button>
+                                <a href="{% url 'delete_post' post.pk %}" class="btn btn-outline-danger rounded-pill px-4">
+                                Удалить пост
+                                </a>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-3 mt-auto border-top border-secondary-subtle text-center text-muted small">
+        <div class="container">
+            © <span>2026</span> Мой блог
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+</body>
+</html>

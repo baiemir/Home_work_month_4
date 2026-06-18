@@ -32,3 +32,7 @@ class CategoryModelForm(forms.ModelForm):
         model = Category
         fields = ['title', 'description', 'is_active']
 
+class PostEditForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ["title", "content", "image", "rate"]

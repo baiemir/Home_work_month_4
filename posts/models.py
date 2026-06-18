@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.admin import User
 
 # Create your models here.
 
@@ -23,10 +23,11 @@ class Post(models.Model):
     title = models.CharField()
     content = models.TextField()
     rate = models.IntegerField()
-    user = models.CharField(max_length=255, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     #tags = models.ManyToManyField(Tags, null=True, blank=True)
     image = models.ImageField(upload_to='posts/', null=True, blank=True)
+    #deleted = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         name = self.category.title if self.category else "-"

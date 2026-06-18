@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http.response import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from posts.models import Post, Category
 from django.http import HttpRequest
-from posts.form import PostForm, CategoryModelForm
+from posts.form import PostForm, CategoryModelForm, PostEditForm
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 
@@ -71,6 +72,9 @@ def create_post(request):
                 category=cleaned_data.get('category'), 
                 rate=5
                 )
+            if request.user.is_authenticated:
+                post.user = request.user
+
             post.save()
             return redirect('posts') # перенаправляем на страницу со списком постов после создания
         context = {
@@ -97,6 +101,53 @@ def create_category(request):
                 is_active = cleaned_data.get('is_active'),
             )
             category.save()
-            return redirect('posts') # перенаправляем на страницу со списком категорий после создания
+            return redirect('create_post') # перенаправляем на страницу со списком категорий после создания
         return render(request, "posts/create_post.html", context={"errors": form.errors}) # если форма не валидна, возвращаем её с ошибками
     return render(request, "posts/create_post.html")
+
+def edit_post(request: HttpRequest, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    
+    if request.method == "POST":
+        #form = PostEditForm(request.POST, request.FILES)
+        # Тут твоя логика сохранения измененного поста...
+        post.title = request.POST.get('title')
+        post.content = request.POST.get('content')
+        # ... и так далее ...
+        post.save()
+        return redirect('/')
+        #if form.is_valid():
+            #cleaned_data = form.cleaned_data
+            #post.title = cleaned_data["title"]
+            #post.content = cleaned_data["content"]
+            #post.image = cleaned_data["image"]
+            #post.rate = cleaned_data["image"]
+            #return redirect("/")
+    #form = PostEditForm(post)
+    return render(request, "posts/edit.html", {"post": post})
+
+@login_required(login_url='login')
+def my_post(request: HttpRequest):
+    user_posts = Post.objects.filter(user=request.user).order_by("-create_at")
+    return render(request, "posts/my_post.html", context={"posts": user_posts})
+
+@login_required(login_url='login')
+def delete_post(request: HttpRequest, pk):
+    # 1. Ищем пост в базе данных по его id (pk)
+    post = get_object_or_404(Post, pk=pk)
+    
+    # 2. ПРОВЕРКА USER'А (Самое важное из твоего ДЗ!)
+    if post.user == request.user:
+        post.delete()  # Удаляем пост из базы данных
+    
+    # 3. Перенаправление
+    # Здесь можно вернуть пользователя обратно на страницу его постов
+        return redirect('my_post')
+    # Если чужой попытался удалить — просто проигнорировать или выдать ошибку
+    else:
+        return HttpResponse("ВЫ не можете удалить чужой пост!", status=403)
+
+
+
+

@@ -109,7 +109,12 @@
                                 <a href="{% url 'post_detail' post.pk %}" class="text-decoration-none text-white link-primary">
                                     {{ post.title }}
                                 </a>
-                            </h2>
+                            {% if post.user %}
+                            <h5 class="card-title text-muted">
+                                User: {{ post.user.email }}
+                            </h5>
+                            {% endif %}
+
                             
                             <p class="card-text text-muted lh-lg">
                                 {{ post.content|truncatewords:20 }}
@@ -119,6 +124,13 @@
                                 <a href="{% url 'post_detail' post.pk %}" class="btn btn-outline-light btn-sm px-3 rounded-pill">
                                     Читать далее →
                                 </a>
+                                {% if post.user.email %}
+                                {% if user.is_authenticated and user.id == post.user.id %}
+                                <a href="{% url 'edit_post' post.pk %}" class="btn btn-outline-light btn-sm px-3 rounded-pill">
+                                    Редактировать
+                                </a>
+                                {% endif %}
+                                {% endif %}
                                 {% if post.published_date %}
                                 <small class="text-muted">{{ post.published_date|date:"j E Y" }}</small>
                                 {% endif %}
