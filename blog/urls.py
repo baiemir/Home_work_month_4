@@ -20,26 +20,27 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from posts.views import about, home, me, get_detail, get_posts, activate_categories_views, category_detail, create_post, create_category, edit_post, my_post, delete_post
-from users.views import register_user, login_user, logout_user
+from posts.views import about, home, me, PostDetailView, PostListView, activate_categories_views, category_detail, PostCreateView, my_post, PostUpdateView, PostDeleteView
+from users.views import RegisterUserView, UserLoginView, UserLogoutView
+from django.contrib.auth.decorators import login_required
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", home, name="home"),
     path("about/", about, name="about"),
     path("test/", me, name="test"),
-    path("posts/", get_posts, name="posts"),
+    path("posts/", PostListView.as_view(), name="posts"),
     path("categories/", activate_categories_views, name="categories"),
-    path("post/<int:pk>/detail/", get_detail, name="post_detail"),
-    path("post/<int:pk>/list/", get_posts, name="post_list"),
+    path("post/<int:pk>/detail/", PostDetailView.as_view(), name="post_detail"),
+    path("post/<int:pk>/list/", PostListView.as_view(), name="post_list"),
     path("category/<int:pk>/detail/", category_detail, name="category_detail"),
-    path("post/create/", create_post, name="create_post"),
-    path("category/create/", create_category, name="create_category"),
-    path("users/register/", register_user, name="register"),
-    path("users/login/", login_user, name="login"),
-    path("users/logout/", logout_user, name="logout"),
-    path("post/<int:pk>/edit/", edit_post, name="edit_post"),
+    path("post/create/", PostCreateView.as_view(), name="create_post"),
+    path("category/create/", PostCreateView.as_view(), name="create_category"),
+    path("users/register/", RegisterUserView.as_view(), name="register"),
+    path("users/login/", UserLoginView.as_view(), name="login"),
+    path("users/logout/", UserLogoutView.as_view(), name="logout"),
+    path("post/<int:pk>/edit/", PostUpdateView.as_view(), name="edit_post"),
     path("posts/my_post/", my_post, name="my_post"),
-    path("post/<int:pk>/delete/", delete_post, name="delete_post")
+    path("post/<int:pk>/delete/", PostDeleteView.as_view(), name="delete_post")
 
 ]
 

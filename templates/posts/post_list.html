@@ -1,4 +1,4 @@
-
+{% load static %}
 
 
 
@@ -81,19 +81,47 @@
             <div class="row justify-content-center">
                 
                 <div class="col-lg-8" style="max-width: 750px;">
+                    <form method="GET" action="" class="mb-5">
+                    <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden border border-secondary">
+                    <span class="input-group-text bg-dark border-0 text-muted ps-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                    </span>
+                    <input type="text" name="search" class="form-control bg-dark border-0 text-white" 
+                    placeholder="Поиск статей по названию или тексту..." 
+                    value="{{ request.GET.search|default:'' }}">
+                    <button class="btn btn-info px-4 fw-bold text-dark" type="submit">Найти</button>
+                    </div>
+                        {% if request.GET.search %}
+                            <div class="text-muted small px-2 mt-2 d-flex justify-content-between">
+                                <span>Результаты по запросу: <strong>"{{ request.GET.search }}"</strong></span>
+                                <a href="?" class="text-info text-decoration-none">Сбросить поиск</a>
+                            </div>
+                        {% endif %}
+                    </form>
 
                     {% for post in posts %}
                     <article class="card post-card mb-4 shadow-sm rounded-4 overflow-hidden">
                         
                         {# Проверка наличия картинки у поста #}
-                        {% if post.image %}
-                        <a href="{% url 'post_detail' post.pk %}">
-                            {# !!! ВАЖНО: Обернули img в контейнер !!! #}
-                            <div class="post-card-img-container">
-                                <img src="{{ post.image.url }}" class="card-img-top post-card-img" alt="{{ post.title }}">
-                            </div>
-                        </a>
-                        {% endif %}
+                       <a href="{% url 'post_detail' post.pk %}">
+                    <div class="post-card-img-container">
+        
+                    {% if post.image %}
+                    {# Если картинка у поста есть, берем её url #}
+                    <img src="{{ post.image.url }}" 
+                    class="card-img-top post-card-img" 
+                    alt="{{ post.title }}">
+                    {% else %}
+                    {# ИСПРАВЛЕНО: Добавили проценты % % в тег static #}
+                    <img src="{% static 'default.jpg' %}" 
+                    class="card-img-top post-card-img" 
+                    alt="{{ post.title }}">
+                    {% endif %}
+        
+                    </div>
+                    </a>
 
                         <div class="card-body p-4">
                             {# Оставляем категорию, заголовок и контент без изменений #}
@@ -109,7 +137,7 @@
                                 <a href="{% url 'post_detail' post.pk %}" class="text-decoration-none text-white link-primary">
                                     {{ post.title }}
                                 </a>
-                            {% if post.user %}
+                            </h2> {% if post.user %}
                             <h5 class="card-title text-muted">
                                 User: {{ post.user.email }}
                             </h5>
